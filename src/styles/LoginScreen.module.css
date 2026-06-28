@@ -1,0 +1,150 @@
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+}
+.card {
+  width: 400px;
+  max-width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 28px;
+}
+.brand {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.logo {
+  font-size: 40px;
+}
+.brand h1 {
+  margin: 6px 0 2px;
+  font-size: 24px;
+}
+.label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.error {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.userList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.userRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.userPick {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.userPick:hover,
+.userPickActive {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+/* Inline "type your phone to log in" row under the selected name */
+.verify {
+  display: flex;
+  gap: 6px;
+  padding: 0 2px 2px;
+}
+.verify input {
+  flex: 1;
+  min-width: 0;
+}
+.verifyGo {
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0 18px;
+  font-weight: 600;
+  transition: background 0.15s, opacity 0.15s;
+}
+.verifyGo:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+.verifyGo:disabled {
+  opacity: 0.5;
+}
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.userInfo strong {
+  color: var(--text);
+}
+.go {
+  color: var(--accent);
+  font-size: 18px;
+}
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 13px;
+  margin: 18px 0 14px;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.divider span {
+  padding: 0 12px;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.submit {
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-weight: 600;
+  transition: background 0.15s, opacity 0.15s;
+}
+.submit:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+.submit:disabled {
+  opacity: 0.5;
+}

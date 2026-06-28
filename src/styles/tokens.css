@@ -1,0 +1,66 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Design tokens — the single source of truth for colors, spacing, etc.
+   Light theme lives in :root; dark theme overrides via [data-theme="dark"].
+   Every component reads these variables only, so dark mode is automatic.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Accent (Modern Indigo) */
+  --accent: #6366f1;
+  --accent-strong: #4f46e5;
+  --accent-soft: #eef2ff; /* tint behind my own bubbles / active rows */
+  --on-accent: #ffffff;
+
+  /* Surfaces */
+  --bg: #f4f5fb; /* app background */
+  --surface: #ffffff; /* panels, cards */
+  --surface-2: #f0f1f7; /* hover, subtle fills */
+  --chat-bg: #f7f8fc; /* message area */
+
+  /* Bubbles */
+  --bubble-mine: #e0e7ff; /* indigo tint */
+  --bubble-theirs: #ffffff;
+
+  /* Text */
+  --text: #1f2330;
+  --text-muted: #6b7280;
+  --text-faint: #9aa1ad;
+
+  /* Lines & effects */
+  --border: #e6e8f0;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+  --shadow: 0 1px 2px rgba(17, 24, 39, 0.06), 0 4px 16px rgba(17, 24, 39, 0.06);
+  --shadow-lg: 0 12px 40px rgba(17, 24, 39, 0.18);
+
+  /* Status */
+  --danger: #e11d48;
+  --online: #22c55e;
+}
+
+[data-theme="dark"] {
+  --accent: #818cf8;
+  --accent-strong: #a5b4fc;
+  --accent-soft: #1e2138;
+  --on-accent: #0b0e1a;
+
+  --bg: #0b0e1a;
+  --surface: #141826;
+  --surface-2: #1c2133;
+  --chat-bg: #0e1220;
+
+  --bubble-mine: #312e81;
+  --bubble-theirs: #1c2133;
+
+  --text: #e8eaf2;
+  --text-muted: #9aa1b4;
+  --text-faint: #6b7186;
+
+  --border: #232a3d;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
+
+  --danger: #fb7185;
+  --online: #4ade80;
+}

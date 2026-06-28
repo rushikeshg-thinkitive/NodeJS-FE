@@ -1,0 +1,43 @@
+/* Two-pane layout. Uses dvh so the iOS address bar/keyboard never clip it. */
+.shell {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+}
+.sidebar {
+  width: 360px;
+  flex-shrink: 0;
+  height: 100%;
+}
+.main {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+}
+
+/* iPad: a little narrower sidebar */
+@media (max-width: 1023px) {
+  .sidebar {
+    width: 300px;
+  }
+}
+
+/* ── Phone: one pane at a time ───────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .sidebar {
+    width: 100%;
+  }
+  .main {
+    display: none;
+  }
+  /* When a chat is open, show the chat pane and hide the list. */
+  .showChat .sidebar {
+    display: none;
+  }
+  .showChat .main {
+    display: flex;
+  }
+}

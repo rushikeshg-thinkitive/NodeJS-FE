@@ -1,0 +1,78 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Global reset + base. Component-specific styles live in *.module.css files.
+   Mobile/iOS rules here keep the app from breaking on iPhone Safari.
+   ───────────────────────────────────────────────────────────────────────── */
+@import "./tokens.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  /* Smooth theme switch */
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* iOS: never zoom on input focus (needs >=16px), kill tap highlight */
+input,
+textarea,
+button {
+  font: inherit;
+  font-size: 16px;
+}
+button {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+/* Inputs share a clean base look */
+input[type="text"],
+input:not([type]),
+input[type="tel"] {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  outline: none;
+  width: 100%;
+}
+input:focus {
+  border-color: var(--accent);
+}
+
+a {
+  color: inherit;
+}
+
+/* Tidy scrollbars (desktop) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+
+/* Tiny shared utilities */
+.muted {
+  color: var(--text-muted);
+}
+.center {
+  text-align: center;
+}
