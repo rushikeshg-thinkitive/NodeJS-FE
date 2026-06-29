@@ -6,7 +6,6 @@
 import { useMemo, useState } from "react";
 import Avatar from "../../shared/ui/Avatar.jsx";
 import IconButton from "../../shared/ui/IconButton.jsx";
-import EmptyState from "../../shared/ui/EmptyState.jsx";
 import { useMessages } from "./useMessages.js";
 import MessageList from "./MessageList.jsx";
 import MessageComposer from "./MessageComposer.jsx";
@@ -16,12 +15,7 @@ import {
 } from "../../shared/lib/conversation.js";
 import styles from "../../styles/ChatView.module.css";
 
-export default function ChatView({
-  user,
-  conversation,
-  onBack,
-  onOpenThread,
-}) {
+export default function ChatView({ user, conversation, onBack, onOpenThread }) {
   const { messages, send, loadOlder, hasMore, loadingOlder, lastReadAt } =
     useMessages(conversation, user);
   const [replyingTo, setReplyingTo] = useState(null);
@@ -34,11 +28,14 @@ export default function ChatView({
   if (!conversation) {
     return (
       <section className={styles.chat}>
-        <EmptyState
-          icon="💬"
-          title="Your messages"
-          subtitle="Select a conversation or start a new chat to begin."
-        />
+        <div className={styles.placeholder}>
+          <div className={styles.illustration} />
+          <h2 className={styles.placeholderTitle}>Chat Web</h2>
+          <p className={styles.placeholderText}>
+            Send and receive messages in real time. Select a conversation or
+            start a new chat to begin.
+          </p>
+        </div>
       </section>
     );
   }

@@ -2,65 +2,71 @@
    Design tokens — the single source of truth for colors, spacing, etc.
    Light theme lives in :root; dark theme overrides via [data-theme="dark"].
    Every component reads these variables only, so dark mode is automatic.
+   Palette: WhatsApp (green accent, beige chat, white/green bubbles).
    ───────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Accent (Modern Indigo) */
-  --accent: #6366f1;
-  --accent-strong: #4f46e5;
-  --accent-soft: #eef2ff; /* tint behind my own bubbles / active rows */
+  /* Accent (WhatsApp green) */
+  --accent: #00a884;
+  --accent-strong: #017561;
+  --accent-soft: #d9fdd3; /* tint behind my own bubbles / active rows */
   --on-accent: #ffffff;
 
   /* Surfaces */
-  --bg: #f4f5fb; /* app background */
+  --bg: #f0f2f5; /* app background / panel gray */
   --surface: #ffffff; /* panels, cards */
-  --surface-2: #f0f1f7; /* hover, subtle fills */
-  --chat-bg: #f7f8fc; /* message area */
+  --surface-2: #f0f2f5; /* hover, subtle fills */
+  --chat-bg: #efeae2; /* message area (beige, under the doodle) */
 
   /* Bubbles */
-  --bubble-mine: #e0e7ff; /* indigo tint */
+  --bubble-mine: #d9fdd3; /* WhatsApp outgoing green */
   --bubble-theirs: #ffffff;
 
   /* Text */
-  --text: #1f2330;
-  --text-muted: #6b7280;
-  --text-faint: #9aa1ad;
+  --text: #111b21;
+  --text-muted: #667781;
+  --text-faint: #8696a0;
+
+  /* Read receipts — WhatsApp uses blue ✓✓, separate from the accent */
+  --tick-read: #53bdeb;
 
   /* Lines & effects */
-  --border: #e6e8f0;
+  --border: #e9edef;
   --radius: 14px;
   --radius-sm: 10px;
   --radius-lg: 20px;
-  --shadow: 0 1px 2px rgba(17, 24, 39, 0.06), 0 4px 16px rgba(17, 24, 39, 0.06);
-  --shadow-lg: 0 12px 40px rgba(17, 24, 39, 0.18);
+  --shadow: 0 1px 2px rgba(11, 20, 26, 0.06), 0 4px 16px rgba(11, 20, 26, 0.06);
+  --shadow-lg: 0 12px 40px rgba(11, 20, 26, 0.18);
 
   /* Status */
   --danger: #e11d48;
-  --online: #22c55e;
+  --online: #25d366;
 }
 
 [data-theme="dark"] {
-  --accent: #818cf8;
-  --accent-strong: #a5b4fc;
-  --accent-soft: #1e2138;
-  --on-accent: #0b0e1a;
+  --accent: #00a884;
+  --accent-strong: #06cf9c;
+  --accent-soft: #2a3942;
+  --on-accent: #ffffff;
 
-  --bg: #0b0e1a;
-  --surface: #141826;
-  --surface-2: #1c2133;
-  --chat-bg: #0e1220;
+  --bg: #111b21;
+  --surface: #202c33;
+  --surface-2: #2a3942;
+  --chat-bg: #0b141a;
 
-  --bubble-mine: #312e81;
-  --bubble-theirs: #1c2133;
+  --bubble-mine: #005c4b;
+  --bubble-theirs: #202c33;
 
-  --text: #e8eaf2;
-  --text-muted: #9aa1b4;
-  --text-faint: #6b7186;
+  --text: #e9edef;
+  --text-muted: #8696a0;
+  --text-faint: #667781;
 
-  --border: #232a3d;
+  --tick-read: #53bdeb;
+
+  --border: #2a3942;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
 
   --danger: #fb7185;
-  --online: #4ade80;
+  --online: #25d366;
 }

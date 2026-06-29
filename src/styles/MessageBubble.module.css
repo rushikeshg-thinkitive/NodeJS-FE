@@ -83,7 +83,7 @@
   font-size: 11px;
 }
 .read {
-  color: var(--accent);
+  color: var(--tick-read);
 }
 
 /* "View thread" indicator chip — shown when the message has thread replies */
@@ -100,7 +100,9 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
 }
 .threadChip:hover {
   border-color: var(--accent);
@@ -134,7 +136,9 @@
 .mine .toolbar {
   left: 4px;
 }
-.row:hover .toolbar {
+/* Reveal on hover (desktop) or when the bubble is tapped open (touch). */
+.row:hover .toolbar,
+.row.open .toolbar {
   opacity: 1;
   pointer-events: auto;
 }
@@ -147,17 +151,11 @@
   border-radius: 50%;
   font-size: 14px;
   line-height: 1;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 .toolbar button:hover {
   background: var(--accent-soft);
   color: var(--accent);
-}
-
-/* Touch devices can't hover — keep the toolbar softly visible & usable */
-@media (hover: none) {
-  .toolbar {
-    opacity: 0.6;
-    pointer-events: auto;
-  }
 }

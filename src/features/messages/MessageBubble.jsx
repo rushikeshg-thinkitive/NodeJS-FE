@@ -3,11 +3,9 @@
 // file, an optional quoted reply, ✓/✓✓ read ticks, and an action bar
 // (Reply, Thread) that sits in the gutter BESIDE the bubble — never over it.
 // ─────────────────────────────────────────────────────────────────────────
+import { useState } from "react";
 import { fileUrl } from "../../shared/config.js";
-import {
-  isReadByOthers,
-  senderIdOf,
-} from "../../shared/lib/conversation.js";
+import { isReadByOthers, senderIdOf } from "../../shared/lib/conversation.js";
 import { formatTime } from "../../shared/lib/format.js";
 import styles from "../../styles/MessageBubble.module.css";
 
@@ -52,11 +50,17 @@ export default function MessageBubble({
   const senderName =
     typeof message.senderId === "object" ? message.senderId?.name : "";
   const read =
-    mine && isReadByOthers(message, lastReadAt, participantIds, currentUser._id);
+    mine &&
+    isReadByOthers(message, lastReadAt, participantIds, currentUser._id);
+
+  // Desktop reveals the toolbar on hover; touch devices reveal it on tap.
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className={`${styles.row} ${mine ? styles.mine : styles.theirs}`}>
-      <div className={styles.bubble}>
+    <div
+      className={`${styles.row} ${mine ? styles.mine : styles.theirs} ${open ? styles.open : ""}`}
+    >
+      <div className={styles.bubble} onClick={() => setOpen((o) => !o)}>
         {!mine && showName && senderName && (
           <div className={styles.sender}>{senderName}</div>
         )}

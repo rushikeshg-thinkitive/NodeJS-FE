@@ -4,7 +4,59 @@
   flex-direction: column;
   min-width: 0;
   height: 100%;
+  position: relative;
+  isolation: isolate; /* keep the wallpaper's negative z-index contained */
   background: var(--chat-bg);
+}
+/* WhatsApp-style doodle wallpaper behind the messages (header/composer cover it). */
+.chat::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: url(/bg-chat-room.png);
+  background-repeat: repeat;
+  background-size: 400px;
+  opacity: 0.06;
+  pointer-events: none;
+}
+:global([data-theme="dark"]) .chat::before {
+  filter: invert(1);
+  opacity: 0.05;
+}
+
+/* "No chat selected" placeholder with the device illustration. */
+.placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+  gap: 10px;
+}
+.illustration {
+  width: 340px;
+  max-width: 72%;
+  height: 200px;
+  background-image: url(/entry-image-light.webp);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+:global([data-theme="dark"]) .illustration {
+  background-image: url(/entry-image-dark.png);
+}
+.placeholderTitle {
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--text);
+}
+.placeholderText {
+  color: var(--text-muted);
+  font-size: 14px;
+  max-width: 380px;
 }
 .header {
   display: flex;
