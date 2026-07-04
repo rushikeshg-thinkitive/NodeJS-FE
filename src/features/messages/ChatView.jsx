@@ -16,8 +16,16 @@ import {
 import styles from "../../styles/ChatView.module.css";
 
 export default function ChatView({ user, conversation, onBack, onOpenThread }) {
-  const { messages, send, loadOlder, hasMore, loadingOlder, lastReadAt } =
-    useMessages(conversation, user);
+  const {
+    messages,
+    send,
+    loadOlder,
+    hasMore,
+    loadingOlder,
+    lastReadAt,
+    typingUser,
+    notifyTyping,
+  } = useMessages(conversation, user);
   const [replyingTo, setReplyingTo] = useState(null);
 
   const participantIds = useMemo(
@@ -75,8 +83,23 @@ export default function ChatView({ user, conversation, onBack, onOpenThread }) {
         loadingOlder={loadingOlder}
       />
 
+      {/* "Name is typing…" — sits just above the composer, WhatsApp-style */}
+      {typingUser && (
+        <div className={styles.typingBar}>
+          <span className={styles.typingBubble}>
+            {typingUser} is typing
+            <span className={styles.dots}>
+              <i />
+              <i />
+              <i />
+            </span>
+          </span>
+        </div>
+      )}
+
       <MessageComposer
         onSend={handleSend}
+        onTyping={notifyTyping}
         replyingTo={replyingTo}
         onCancelReply={() => setReplyingTo(null)}
       />

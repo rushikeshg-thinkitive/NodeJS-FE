@@ -1,7 +1,57 @@
 .wrap {
+  position: relative; /* anchors the emoji / GIF popovers */
   border-top: 1px solid var(--border);
   background: var(--surface);
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Emoji / GIF popover — floats just above the composer bar */
+.popover {
+  position: absolute;
+  bottom: 100%;
+  left: 8px;
+  right: 8px;
+  max-width: 420px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 20;
+}
+.loading {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.gifBtn {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Our global input styles leak into the emoji picker's search box and put
+   its magnifier icon on top of the text. The picker's input uses generated
+   class names, so target any input in its search container and win with
+   !important — left padding makes room for the magnifier icon. */
+.popover :global(.epr-search-container) input {
+  padding: 8px 30px 8px 38px !important;
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 14px !important;
+}
+
+/* Phones: keep the popovers comfortably inside the small screen */
+@media (max-width: 767px) {
+  .popover {
+    max-width: none; /* span the composer width */
+  }
+  .popover :global(.EmojiPickerReact) {
+    height: 300px !important; /* shorter so the chat stays visible */
+  }
 }
 .replyPreview {
   display: flex;

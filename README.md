@@ -4,7 +4,8 @@ A modern, real-time chat UI for the [`Websocket`](../Websocket) backend.
 Live conversation list on the left, live chat on the right.
 
 **Features:** 1-to-1 chat, group chat, image/file sharing (Cloudinary),
-**unread badges**, **read receipts (✓✓)**, **reply / quote**, and **threads**.
+**emoji picker**, **GIF search (Tenor)**, **typing indicator**, **unread badges**,
+**read receipts (✓✓)**, **reply / quote**, and **threads**.
 **Light / dark theme** toggle. Fully **responsive** — one pane at a time on phones,
 two panes on tablet/laptop, with iOS-Safari-safe layout.
 
@@ -92,6 +93,7 @@ src/
 | `conversationUpdated`  | Re-sort the sidebar; refresh the unread badge          |
 | `newMessage`           | Append the message to the open chat                    |
 | `messagesRead`         | Flip my ✓ ticks to ✓✓ when the other side reads        |
+| `userTyping`           | Show "name is typing…" in the chat header for ~3s      |
 | `newThreadMessage`     | Append a reply inside the open thread panel            |
 | `threadUpdated`        | Show the "View thread" indicator on a message live     |
 
@@ -99,8 +101,8 @@ src/
 > socket, so the UI just reads `.name` — no client-side user lookup needed.
 
 We emit: `registerUser`, `createConversation`, `joinConversation`/`leaveConversation`,
-`sendMessage` (carries `replyTo`), `markAsRead`, `joinThread`/`leaveThread`,
-`sendThreadMessage`.
+`sendMessage` (carries `replyTo`), `markAsRead`, `typing` (throttled to one emit
+per 2s while typing), `joinThread`/`leaveThread`, `sendThreadMessage`.
 
 > We don't add our own sent messages to the screen directly — the backend echoes every
 > message back via `newMessage`, so there's one source of truth.
@@ -109,6 +111,9 @@ We emit: `registerUser`, `createConversation`, `joinConversation`/`leaveConversa
 
 | Feature        | UI                                                | Code |
 | -------------- | ------------------------------------------------- | ---- |
+| Emoji          | 😊 opens a full picker (emoji-picker-react, lazy-loaded); emoji are just text | `messages/MessageComposer.jsx` |
+| GIFs           | GIF button → Tenor search grid (via BE `/gifs` proxy); sends as an `image` message | `messages/GifPicker.jsx` + `MessageComposer.jsx` |
+| Typing         | "name is typing…" in the header while the other side types (ephemeral socket relay) | `useMessages.js` (`typingUser`/`notifyTyping`) + `ChatView.jsx` |
 | Unread badges  | Count pill on a conversation; clears on open      | `conversations/ConversationItem.jsx` + `unreadFor()` |
 | Read receipts  | ✓ sent → ✓✓ read; compares each message's time to per-user read cursors (`lastReadAt`) | `messages/MessageBubble.jsx` + `isReadByOthers()` + `useMessages.js` |
 | Reply / quote  | Hover → ↩ Reply; quoted block shown in the bubble | `messages/ChatView.jsx`, `MessageComposer.jsx`, `MessageBubble.jsx` |

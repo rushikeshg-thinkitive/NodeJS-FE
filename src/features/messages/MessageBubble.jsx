@@ -9,6 +9,42 @@ import { isReadByOthers, senderIdOf } from "../../shared/lib/conversation.js";
 import { formatTime } from "../../shared/lib/format.js";
 import styles from "../../styles/MessageBubble.module.css";
 
+// WhatsApp-style ticks: single gray = sent, double blue = read.
+// stroke="currentColor" lets the .ticks / .read CSS classes set the color.
+function Ticks({ read }) {
+  return read ? (
+    <svg viewBox="0 0 24 20" className={styles.tickSvg} aria-label="Read">
+      <path
+        d="M1 10.5L5 14.5L13 5.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 10.5L11 14.5L19 5.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 20 20" className={styles.tickSvg} aria-label="Sent">
+      <path
+        d="M4 10.5L8 14.5L16 5.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 // Shared body renderer (text / image / file).
 function Body({ message }) {
   if (message.type === "image") {
@@ -88,7 +124,7 @@ export default function MessageBubble({
           <span>{formatTime(message.createdAt)}</span>
           {mine && (
             <span className={`${styles.ticks} ${read ? styles.read : ""}`}>
-              {read ? "✓✓" : "✓"}
+              <Ticks read={read} />
             </span>
           )}
         </div>

@@ -5,7 +5,8 @@
 //   • append on "newMessage"
 //   • on "messagesRead", advance that user's read cursor (ticks flip)
 //   • on "threadUpdated", flag the parent so the thread indicator shows
-// Returns the messages, a send(), and pagination helpers.
+//   • typing: notifyTyping() emits (throttled); "userTyping" → typingUser
+// Returns the messages, a send(), typing helpers, and pagination helpers.
 // ─────────────────────────────────────────────────────────────────────────
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getMessages } from "../../shared/api/client.js";
@@ -15,6 +16,7 @@ import {
   leaveConversation,
   sendMessage,
   markAsRead,
+  sendTyping,
 } from "../../shared/realtime/socket.js";
 
 const PAGE = 50;
@@ -25,6 +27,8 @@ export function useMessages(conversation, user) {
   const [loadingOlder, setLoadingOlder] = useState(false);
   // Per-user read cursors { userId: lastReadTimestamp } → drives ✓✓ ticks.
   const [lastReadAt, setLastReadAt] = useState({});
+  // Who is typing right now (name), or null.
+  const [typingUser, setTypingUser] = useState(null);
   const convId = conversation?._id;
 
   // Refs so loadOlder can read fresh values without re-creating itself.
@@ -99,7 +103,10 @@ export function useMessages(conversation, user) {
         typeof message.senderId === "string"
           ? message.senderId
           : message.senderId?._id;
-      if (senderId !== user._id) markAsRead(convId, user._id);
+      if (senderId !== user._id) {
+        markAsRead(convId, user._id);
+        setTypingUser(null); // their message arrived — stop showing "typing…"
+      }
     }
     socket.on("newMessage", handleNew);
     return () => socket.off("newMessage", handleNew);
@@ -127,6 +134,34 @@ export function useMessages(conversation, user) {
     return () => socket.off("threadUpdated", handleThreadUpdated);
   }, []);
 
+  // ── Typing indicator ──────────────────────────────────────────────────
+  // Someone else is typing in THIS chat → show their name; hide it 3s after
+  // their last "typing" event (each event restarts the timer).
+  const typingTimerRef = useRef(null);
+  useEffect(() => {
+    setTypingUser(null); // reset when switching chats
+    function handleTyping({ conversationId, userId, name }) {
+      if (conversationId !== convId || userId === user._id) return;
+      setTypingUser(name);
+      clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = setTimeout(() => setTypingUser(null), 3000);
+    }
+    socket.on("userTyping", handleTyping);
+    return () => {
+      socket.off("userTyping", handleTyping);
+      clearTimeout(typingTimerRef.current);
+    };
+  }, [convId, user._id]);
+
+  // Tell others I'm typing — at most one emit per 2s no matter how fast I type.
+  const lastTypingSentRef = useRef(0);
+  const notifyTyping = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 2000) return;
+    lastTypingSentRef.current = now;
+    sendTyping(convId, user._id, user.name);
+  }, [convId, user._id, user.name]);
+
   // Send a message (optionally replying to `replyTo`).
   function send(payload, replyTo) {
     sendMessage({
@@ -135,7 +170,17 @@ export function useMessages(conversation, user) {
       ...payload,
       replyTo: replyTo?._id || null,
     });
+    setTypingUser(null); // my own send never hides behind a stale indicator
   }
 
-  return { messages, send, loadOlder, hasMore, loadingOlder, lastReadAt };
+  return {
+    messages,
+    send,
+    loadOlder,
+    hasMore,
+    loadingOlder,
+    lastReadAt,
+    typingUser,
+    notifyTyping,
+  };
 }

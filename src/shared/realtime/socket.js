@@ -40,6 +40,10 @@ export const sendMessage = (data) => socket.emit("sendMessage", data);
 export const markAsRead = (conversationId, userId) =>
   socket.emit("markAsRead", { conversationId, userId });
 
+// "I'm typing" — the server relays it to everyone else in the conversation.
+export const sendTyping = (conversationId, userId, name) =>
+  socket.emit("typing", { conversationId, userId, name });
+
 // ── Threads (a side-conversation off one parent message) ────────────────────
 export const joinThread = (messageId) => socket.emit("joinThread", { messageId });
 export const leaveThread = (messageId) =>

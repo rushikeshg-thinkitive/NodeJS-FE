@@ -80,10 +80,17 @@
   margin-top: 3px;
 }
 .ticks {
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-faint); /* single tick = sent (gray) */
 }
 .read {
-  color: var(--tick-read);
+  color: var(--tick-read); /* double tick = read (WhatsApp blue) */
+}
+.tickSvg {
+  height: 14px;
+  width: auto;
+  display: block;
 }
 
 /* "View thread" indicator chip — shown when the message has thread replies */

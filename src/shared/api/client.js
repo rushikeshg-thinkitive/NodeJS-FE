@@ -57,6 +57,9 @@ export const getMessages = (conversationId, { before, limit = 50 } = {}) =>
 export const getThreadMessages = (messageId) =>
   request(`/messages/${messageId}/thread`);
 
+// ── GIF search (Tenor, proxied by the backend so the key stays secret) ──────
+export const getGifs = (q) => request(withQuery("/gifs", { q }));
+
 // ── File upload ─────────────────────────────────────────────────────────────
 // Multipart form-data. Backend uploads to Cloudinary, returns { url }.
 export function uploadFile(file) {
