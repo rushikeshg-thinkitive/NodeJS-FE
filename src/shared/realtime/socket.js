@@ -24,8 +24,10 @@ socket.on("connect", () => {
 });
 
 // ── Conversation rooms ──────────────────────────────────────────────────────
-export const joinConversation = (conversationId) =>
-  socket.emit("joinConversation", { conversationId });
+// `onJoined` fires once the server CONFIRMS the join (socket.io ack) — load
+// history in it so no message can slip between "fetched" and "in the room".
+export const joinConversation = (conversationId, onJoined) =>
+  socket.emit("joinConversation", { conversationId }, onJoined);
 
 export const leaveConversation = (conversationId) =>
   socket.emit("leaveConversation", { conversationId });
@@ -45,7 +47,8 @@ export const sendTyping = (conversationId, userId, name) =>
   socket.emit("typing", { conversationId, userId, name });
 
 // ── Threads (a side-conversation off one parent message) ────────────────────
-export const joinThread = (messageId) => socket.emit("joinThread", { messageId });
+export const joinThread = (messageId, onJoined) =>
+  socket.emit("joinThread", { messageId }, onJoined);
 export const leaveThread = (messageId) =>
   socket.emit("leaveThread", { messageId });
 

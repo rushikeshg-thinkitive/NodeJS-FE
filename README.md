@@ -107,6 +107,10 @@ per 2s while typing), `joinThread`/`leaveThread`, `sendThreadMessage`.
 > We don't add our own sent messages to the screen directly — the backend echoes every
 > message back via `newMessage`, so there's one source of truth.
 
+> **No lost messages:** history is fetched only after the server *acks* the room join,
+> fetched pages are **merged** (never replace live state — `shared/lib/merge.js`), and a
+> reconnect automatically re-joins the room + reloads the newest page.
+
 ### Feature cheat sheet
 
 | Feature        | UI                                                | Code |

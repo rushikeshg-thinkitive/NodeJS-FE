@@ -10,6 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getMessages } from "../../shared/api/client.js";
+import { mergeById, oldestFirst } from "../../shared/lib/merge.js";
 import {
   socket,
   joinConversation,
@@ -55,16 +56,34 @@ export function useMessages(conversation, user) {
     setMessages([]); // clear the previous conversation for a clean initial load
     setHasMore(false);
     setLastReadAt(conversation.lastReadAt || {}); // seed read cursors
-    joinConversation(convId);
-    getMessages(convId, { limit: PAGE })
-      .then((page) => {
-        if (cancelled) return;
-        setMessages(page);
-        setHasMore(page.length === PAGE);
-      })
-      .catch(console.error);
+
+    // MERGE the fetched page into state instead of replacing it — a live
+    // socket message can land while this request is in flight, and replacing
+    // would silently drop it (it only reappeared after a reload).
+    function loadNewest() {
+      if (cancelled) return;
+      getMessages(convId, { limit: PAGE })
+        .then((page) => {
+          if (cancelled) return;
+          setMessages((prev) => mergeById(prev, page).sort(oldestFirst));
+          setHasMore(page.length === PAGE);
+        })
+        .catch(console.error);
+    }
+
+    // Fetch history only AFTER the server confirms we're in the room (ack).
+    // Order then guarantees: saved before the fetch → in the page;
+    // saved after → arrives live. Nothing can fall in between.
+    const join = () => joinConversation(convId, loadNewest);
+    join();
+
+    // A reconnect gets a fresh socket with NO rooms — join again and reload
+    // the newest page to catch anything missed while offline.
+    socket.on("connect", join);
+
     return () => {
       cancelled = true;
+      socket.off("connect", join);
       leaveConversation(convId);
     };
   }, [convId]);
@@ -82,7 +101,8 @@ export function useMessages(conversation, user) {
         before: oldest.createdAt,
         limit: PAGE,
       });
-      setMessages((prev) => [...older, ...prev]);
+      // Older page goes in front; mergeById drops any overlap at page edges.
+      setMessages((prev) => mergeById(older, prev));
       setHasMore(older.length === PAGE);
     } catch (e) {
       console.error(e);

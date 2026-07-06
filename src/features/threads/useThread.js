@@ -6,6 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 import { useEffect, useState } from "react";
 import { getThreadMessages } from "../../shared/api/client.js";
+import { mergeById, oldestFirst } from "../../shared/lib/merge.js";
 import {
   socket,
   joinThread,
@@ -18,9 +19,30 @@ export function useThread(parent, conversation, user) {
   const parentId = parent._id;
 
   useEffect(() => {
-    joinThread(parentId);
-    getThreadMessages(parentId).then(setReplies).catch(console.error);
-    return () => leaveThread(parentId);
+    let cancelled = false;
+    setReplies([]); // switching threads starts clean
+
+    // Merge (don't replace) — a live reply can land while the fetch runs.
+    function load() {
+      if (cancelled) return;
+      getThreadMessages(parentId)
+        .then((list) => {
+          if (cancelled) return;
+          setReplies((prev) => mergeById(prev, list).sort(oldestFirst));
+        })
+        .catch(console.error);
+    }
+
+    // Load history only after the join is confirmed; re-join on reconnect.
+    const join = () => joinThread(parentId, load);
+    join();
+    socket.on("connect", join);
+
+    return () => {
+      cancelled = true;
+      socket.off("connect", join);
+      leaveThread(parentId);
+    };
   }, [parentId]);
 
   useEffect(() => {

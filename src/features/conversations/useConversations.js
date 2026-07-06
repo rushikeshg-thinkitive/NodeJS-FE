@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getConversations } from "../../shared/api/client.js";
+import { mergeById, newestFirst } from "../../shared/lib/merge.js";
 import { socket, registerUser } from "../../shared/realtime/socket.js";
 
 const PAGE = 20;
@@ -14,9 +15,7 @@ const PAGE = 20;
 // Insert/replace a conversation by _id, then sort newest-first.
 function upsertSorted(list, conv) {
   const others = list.filter((c) => c._id !== conv._id);
-  return [conv, ...others].sort(
-    (a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt),
-  );
+  return [conv, ...others].sort(newestFirst);
 }
 
 export function useConversations(user) {
@@ -36,13 +35,30 @@ export function useConversations(user) {
 
   // Load the newest page + register once.
   useEffect(() => {
-    getConversations(user._id, { limit: PAGE })
-      .then((page) => {
-        setConversations(page);
-        setHasMore(page.length === PAGE);
-      })
-      .catch(console.error);
+    let cancelled = false;
+    setConversations([]); // a different user starts with a clean list
+
+    // Merge (don't replace) — a live conversationUpdated can land while the
+    // fetch runs; the socket version is fresher, so keep it over the page's.
+    function loadNewest() {
+      getConversations(user._id, { limit: PAGE })
+        .then((page) => {
+          if (cancelled) return;
+          setConversations((prev) => mergeById(prev, page).sort(newestFirst));
+          setHasMore(page.length === PAGE);
+        })
+        .catch(console.error);
+    }
+
     registerUser(user._id);
+    loadNewest();
+    // After a reconnect, refresh the list to catch bumps missed while offline
+    // (registerUser is re-sent by the socket module itself).
+    socket.on("connect", loadNewest);
+    return () => {
+      cancelled = true;
+      socket.off("connect", loadNewest);
+    };
   }, [user._id]);
 
   // Fetch the previous (older) page and append it.
@@ -59,16 +75,8 @@ export function useConversations(user) {
         before: last.lastMessageAt,
         limit: PAGE,
       });
-      setConversations((prev) => {
-        // Merge + dedupe by _id (a live bump could overlap a page boundary).
-        const merged = [...prev];
-        older.forEach((c) => {
-          if (!merged.some((m) => m._id === c._id)) merged.push(c);
-        });
-        return merged.sort(
-          (a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt),
-        );
-      });
+      // Merge + dedupe by _id (a live bump could overlap a page boundary).
+      setConversations((prev) => mergeById(prev, older).sort(newestFirst));
       setHasMore(older.length === PAGE);
     } catch (e) {
       console.error(e);
