@@ -79,6 +79,9 @@
   color: var(--text-faint);
   margin-top: 3px;
 }
+.edited {
+  font-style: italic;
+}
 .ticks {
   display: inline-flex;
   align-items: center;

@@ -21,6 +21,8 @@ export default function MessageComposer({
   onTyping,
   replyingTo,
   onCancelReply,
+  editing, // my message being edited (main chat only)
+  onCancelEdit,
 }) {
   const [text, setText] = useState("");
   // File chosen but not sent yet — { file, previewUrl (images only) }
@@ -40,6 +42,12 @@ export default function MessageComposer({
     document.addEventListener("pointerdown", handleClickAway);
     return () => document.removeEventListener("pointerdown", handleClickAway);
   }, [panel]);
+
+  // Entering edit mode pre-fills the input with the message text;
+  // leaving it (cancel or done) clears the input.
+  useEffect(() => {
+    setText(editing ? editing.text : "");
+  }, [editing]);
 
   function togglePanel(name) {
     setPanel((current) => (current === name ? null : name));
@@ -72,11 +80,12 @@ export default function MessageComposer({
   }
 
   // Send = staged file first (upload now), then any typed text.
+  // In edit mode only the text path runs (attachments are disabled).
   async function handleSubmit(e) {
     e.preventDefault();
     const trimmed = text.trim();
 
-    if (pending) {
+    if (pending && !editing) {
       setUploading(true);
       try {
         const { url } = await uploadFile(pending.file);
@@ -118,6 +127,19 @@ export default function MessageComposer({
             <span>{replyingTo.text || `[${replyingTo.type}]`}</span>
           </div>
           <IconButton label="Cancel reply" onClick={onCancelReply}>
+            ✕
+          </IconButton>
+        </div>
+      )}
+
+      {/* Edit mode banner — same layout as the reply preview */}
+      {editing && (
+        <div className={styles.replyPreview}>
+          <div className={styles.replyBody}>
+            <strong>✏️ Editing message</strong>
+            <span>{editing.text}</span>
+          </div>
+          <IconButton label="Cancel edit" onClick={onCancelEdit}>
             ✕
           </IconButton>
         </div>
@@ -186,13 +208,14 @@ export default function MessageComposer({
           label="GIF"
           className={styles.gifBtn}
           onClick={() => togglePanel("gif")}
+          disabled={!!editing}
         >
           GIF
         </IconButton>
         <IconButton
           label="Attach file"
           onClick={() => fileRef.current.click()}
-          disabled={uploading}
+          disabled={uploading || !!editing}
         >
           📎
         </IconButton>

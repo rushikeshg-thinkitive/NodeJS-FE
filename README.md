@@ -93,6 +93,7 @@ src/
 | `conversationUpdated`  | Re-sort the sidebar; refresh the unread badge          |
 | `newMessage`           | Append the message to the open chat                    |
 | `messagesRead`         | Flip my ✓ ticks to ✓✓ when the other side reads        |
+| `messageEdited`        | Swap the edited message in place (shows "edited")      |
 | `userTyping`           | Show "name is typing…" in the chat header for ~3s      |
 | `newThreadMessage`     | Append a reply inside the open thread panel            |
 | `threadUpdated`        | Show the "View thread" indicator on a message live     |
@@ -101,8 +102,8 @@ src/
 > socket, so the UI just reads `.name` — no client-side user lookup needed.
 
 We emit: `registerUser`, `createConversation`, `joinConversation`/`leaveConversation`,
-`sendMessage` (carries `replyTo`), `markAsRead`, `typing` (throttled to one emit
-per 2s while typing), `joinThread`/`leaveThread`, `sendThreadMessage`.
+`sendMessage` (carries `replyTo`), `editMessage`, `markAsRead`, `typing` (throttled
+to one emit per 2s while typing), `joinThread`/`leaveThread`, `sendThreadMessage`.
 
 > We don't add our own sent messages to the screen directly — the backend echoes every
 > message back via `newMessage`, so there's one source of truth.
@@ -122,6 +123,7 @@ per 2s while typing), `joinThread`/`leaveThread`, `sendThreadMessage`.
 | Unread badges  | Count pill on a conversation; clears on open      | `conversations/ConversationItem.jsx` + `unreadFor()` |
 | Read receipts  | ✓ sent → ✓✓ read; compares each message's time to per-user read cursors (`lastReadAt`) | `messages/MessageBubble.jsx` + `isReadByOthers()` + `useMessages.js` |
 | Reply / quote  | Hover → ↩ Reply; quoted block shown in the bubble | `messages/ChatView.jsx`, `MessageComposer.jsx`, `MessageBubble.jsx` |
+| Edit message   | Hover my text message → ✏️; composer pre-fills, send saves; "edited" label | same files + `useMessages.js` (`edit`, `messageEdited`) |
 | Threads        | Hover → 🧵; drawer (desktop) / full-screen (phone)| `threads/ThreadPanel.jsx` + `useThread.js` |
 | Thread indicator | "🧵 View thread" chip on messages that have replies (BE `hasThread` + `threadUpdated`) | `messages/MessageBubble.jsx` + `useMessages.js` |
 | Pagination     | Messages: newest 50, scroll **up** for older 50 (position kept). Conversations: newest 20, scroll **down** for older 20. Cursor-based (`?before=&limit=`) | `useMessages.js`/`MessageList.jsx`, `useConversations.js`/`ConversationList.jsx` |

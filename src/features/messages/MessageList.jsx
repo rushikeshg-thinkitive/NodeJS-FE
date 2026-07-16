@@ -18,6 +18,7 @@ export default function MessageList({
   lastReadAt,
   isGroup,
   onReply,
+  onEdit,
   onOpenThread,
   loadOlder,
   hasMore,
@@ -96,6 +97,7 @@ export default function MessageList({
               lastReadAt={lastReadAt}
               showName={isGroup}
               onReply={onReply}
+              onEdit={onEdit}
               onOpenThread={onOpenThread}
             />
           </div>

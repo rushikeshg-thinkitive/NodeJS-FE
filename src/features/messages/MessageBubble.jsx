@@ -80,6 +80,7 @@ export default function MessageBubble({
   lastReadAt,
   showName,
   onReply,
+  onEdit,
   onOpenThread,
 }) {
   const mine = senderIdOf(message) === currentUser._id;
@@ -121,6 +122,7 @@ export default function MessageBubble({
         )}
 
         <div className={styles.meta}>
+          {message.editedAt && <span className={styles.edited}>edited</span>}
           <span>{formatTime(message.createdAt)}</span>
           {mine && (
             <span className={`${styles.ticks} ${read ? styles.read : ""}`}>
@@ -134,6 +136,11 @@ export default function MessageBubble({
           <button title="Reply" onClick={() => onReply(message)}>
             ↩
           </button>
+          {mine && message.type === "text" && (
+            <button title="Edit" onClick={() => onEdit(message)}>
+              ✏️
+            </button>
+          )}
           <button title="Open thread" onClick={() => onOpenThread(message)}>
             🧵
           </button>

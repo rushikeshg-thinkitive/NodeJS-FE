@@ -38,6 +38,9 @@ export const createConversation = (data) =>
 // `data` may also include `replyTo` (id of the quoted message).
 export const sendMessage = (data) => socket.emit("sendMessage", data);
 
+// Edit one of my own text messages — server broadcasts "messageEdited".
+export const editMessage = (data) => socket.emit("editMessage", data);
+
 // Reset our unread count + mark messages read (turns others' ticks blue).
 export const markAsRead = (conversationId, userId) =>
   socket.emit("markAsRead", { conversationId, userId });

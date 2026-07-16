@@ -16,6 +16,7 @@ import {
   joinConversation,
   leaveConversation,
   sendMessage,
+  editMessage,
   markAsRead,
   sendTyping,
 } from "../../shared/realtime/socket.js";
@@ -142,6 +143,18 @@ export function useMessages(conversation, user) {
     return () => socket.off("messagesRead", handleRead);
   }, [convId]);
 
+  // A message was edited → swap the updated copy in place.
+  useEffect(() => {
+    function handleEdited(message) {
+      if (message.conversationId !== convId) return;
+      setMessages((prev) =>
+        prev.map((m) => (m._id === message._id ? message : m)),
+      );
+    }
+    socket.on("messageEdited", handleEdited);
+    return () => socket.off("messageEdited", handleEdited);
+  }, [convId]);
+
   // A message just got its first thread reply → flag it so we can show the
   // "thread exists" indicator live.
   useEffect(() => {
@@ -193,9 +206,15 @@ export function useMessages(conversation, user) {
     setTypingUser(null); // my own send never hides behind a stale indicator
   }
 
+  // Edit one of my own text messages (server validates + broadcasts).
+  function edit(messageId, text) {
+    editMessage({ messageId, senderId: user._id, text });
+  }
+
   return {
     messages,
     send,
+    edit,
     loadOlder,
     hasMore,
     loadingOlder,

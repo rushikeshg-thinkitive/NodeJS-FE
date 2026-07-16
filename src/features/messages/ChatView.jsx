@@ -19,6 +19,7 @@ export default function ChatView({ user, conversation, onBack, onOpenThread }) {
   const {
     messages,
     send,
+    edit,
     loadOlder,
     hasMore,
     loadingOlder,
@@ -27,6 +28,17 @@ export default function ChatView({ user, conversation, onBack, onOpenThread }) {
     notifyTyping,
   } = useMessages(conversation, user);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [editing, setEditing] = useState(null); // my message being edited
+
+  // Reply and edit are exclusive — starting one cancels the other.
+  function startReply(message) {
+    setReplyingTo(message);
+    setEditing(null);
+  }
+  function startEdit(message) {
+    setEditing(message);
+    setReplyingTo(null);
+  }
 
   const participantIds = useMemo(
     () => participantIdsOf(conversation),
@@ -51,6 +63,11 @@ export default function ChatView({ user, conversation, onBack, onOpenThread }) {
   const title = conversationTitle(conversation, user);
 
   function handleSend(payload) {
+    if (editing) {
+      edit(editing._id, payload.text); // an edit only changes the text
+      setEditing(null);
+      return;
+    }
     send(payload, replyingTo);
     setReplyingTo(null);
   }
@@ -76,7 +93,8 @@ export default function ChatView({ user, conversation, onBack, onOpenThread }) {
         participantIds={participantIds}
         lastReadAt={lastReadAt}
         isGroup={conversation.isGroup}
-        onReply={setReplyingTo}
+        onReply={startReply}
+        onEdit={startEdit}
         onOpenThread={onOpenThread}
         loadOlder={loadOlder}
         hasMore={hasMore}
@@ -102,6 +120,8 @@ export default function ChatView({ user, conversation, onBack, onOpenThread }) {
         onTyping={notifyTyping}
         replyingTo={replyingTo}
         onCancelReply={() => setReplyingTo(null)}
+        editing={editing}
+        onCancelEdit={() => setEditing(null)}
       />
     </section>
   );
