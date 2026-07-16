@@ -3,7 +3,7 @@
 // file, an optional quoted reply, ✓/✓✓ read ticks, and an action bar
 // (Reply, Thread) that sits in the gutter BESIDE the bubble — never over it.
 // ─────────────────────────────────────────────────────────────────────────
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fileUrl } from "../../shared/config.js";
 import { isReadByOthers, senderIdOf } from "../../shared/lib/conversation.js";
 import { formatTime } from "../../shared/lib/format.js";
@@ -91,10 +91,29 @@ export default function MessageBubble({
     isReadByOthers(message, lastReadAt, participantIds, currentUser._id);
 
   // Desktop reveals the toolbar on hover; touch devices reveal it on tap.
+  // Once opened by a tap it closes on a click ANYWHERE outside this bubble.
   const [open, setOpen] = useState(false);
+  const rowRef = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    function handleClickAway(e) {
+      if (!rowRef.current?.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("pointerdown", handleClickAway);
+    return () => document.removeEventListener("pointerdown", handleClickAway);
+  }, [open]);
+
+  // Run a toolbar action without the click reaching the bubble (which would
+  // pin the toolbar open), and close the toolbar after it.
+  function action(e, fn) {
+    e.stopPropagation();
+    setOpen(false);
+    fn(message);
+  }
 
   return (
     <div
+      ref={rowRef}
       className={`${styles.row} ${mine ? styles.mine : styles.theirs} ${open ? styles.open : ""}`}
     >
       <div className={styles.bubble} onClick={() => setOpen((o) => !o)}>
@@ -115,7 +134,7 @@ export default function MessageBubble({
         {message.hasThread && (
           <button
             className={styles.threadChip}
-            onClick={() => onOpenThread(message)}
+            onClick={(e) => action(e, onOpenThread)}
           >
             🧵 View thread <span className={styles.threadArrow}>→</span>
           </button>
@@ -133,15 +152,15 @@ export default function MessageBubble({
 
         {/* Floating hover toolbar (pill), anchored to the bubble's top corner */}
         <div className={styles.toolbar}>
-          <button title="Reply" onClick={() => onReply(message)}>
+          <button title="Reply" onClick={(e) => action(e, onReply)}>
             ↩
           </button>
           {mine && message.type === "text" && (
-            <button title="Edit" onClick={() => onEdit(message)}>
+            <button title="Edit" onClick={(e) => action(e, onEdit)}>
               ✏️
             </button>
           )}
-          <button title="Open thread" onClick={() => onOpenThread(message)}>
+          <button title="Open thread" onClick={(e) => action(e, onOpenThread)}>
             🧵
           </button>
         </div>
