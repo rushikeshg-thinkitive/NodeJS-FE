@@ -79,6 +79,33 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Staged attachment — thumbnail / 📎 + name + ✕, shown above the bar
+   until the user presses send (or cancels). */
+.filePreview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 0;
+}
+.fileThumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.fileIcon {
+  font-size: 22px;
+}
+.fileName {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .bar {
   display: flex;
   align-items: center;
@@ -104,7 +131,9 @@
   background: var(--accent);
   color: var(--on-accent);
   font-size: 16px;
-  transition: background 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    transform 0.1s;
 }
 .send:hover:not(:disabled) {
   background: var(--accent-strong);

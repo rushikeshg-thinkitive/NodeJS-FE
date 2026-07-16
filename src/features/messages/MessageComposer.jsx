@@ -1,7 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────
 // Reusable composer — used by both the main chat and threads.
-// Owns text + file upload + emoji picker + GIF search, then calls
+// Owns text + file attach + emoji picker + GIF search, then calls
 //     onSend({ type, text?, fileUrl?, fileName? })
+// Picking a file does NOT upload it — it shows a preview above the bar with
+// a ✕ to cancel; the upload happens only when the user presses send.
 // The parent attaches ids / replyTo. Optionally shows a reply preview.
 // `onTyping` (optional) is called as the user types → typing indicator.
 // ─────────────────────────────────────────────────────────────────────────
@@ -21,6 +23,8 @@ export default function MessageComposer({
   onCancelReply,
 }) {
   const [text, setText] = useState("");
+  // File chosen but not sent yet — { file, previewUrl (images only) }
+  const [pending, setPending] = useState(null);
   const [uploading, setUploading] = useState(false);
   // Which popover is open: null | "emoji" | "gif"
   const [panel, setPanel] = useState(null);
@@ -46,12 +50,54 @@ export default function MessageComposer({
     onTyping?.(); // let others see "… is typing"
   }
 
-  function submitText(e) {
+  // Picking a file only STAGES it (nothing uploads until send).
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    clearPending(); // replacing a previous pick
+    setPending({
+      file,
+      previewUrl: file.type.startsWith("image/")
+        ? URL.createObjectURL(file)
+        : null,
+    });
+    fileRef.current.value = ""; // allow re-picking the same file later
+  }
+
+  function clearPending() {
+    setPending((p) => {
+      if (p?.previewUrl) URL.revokeObjectURL(p.previewUrl); // free memory
+      return null;
+    });
+  }
+
+  // Send = staged file first (upload now), then any typed text.
+  async function handleSubmit(e) {
     e.preventDefault();
     const trimmed = text.trim();
-    if (!trimmed) return;
-    onSend({ type: "text", text: trimmed });
-    setText("");
+
+    if (pending) {
+      setUploading(true);
+      try {
+        const { url } = await uploadFile(pending.file);
+        onSend({
+          type: pending.file.type.startsWith("image/") ? "image" : "file",
+          fileUrl: url,
+          fileName: pending.file.name,
+        });
+        clearPending();
+      } catch (err) {
+        alert("Upload failed: " + err.message);
+        return; // keep the preview so the user can retry or cancel
+      } finally {
+        setUploading(false);
+      }
+    }
+
+    if (trimmed) {
+      onSend({ type: "text", text: trimmed });
+      setText("");
+    }
     setPanel(null);
   }
 
@@ -61,24 +107,7 @@ export default function MessageComposer({
     setPanel(null);
   }
 
-  async function handleFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const { url } = await uploadFile(file);
-      onSend({
-        type: file.type.startsWith("image/") ? "image" : "file",
-        fileUrl: url,
-        fileName: file.name,
-      });
-    } catch (err) {
-      alert("Upload failed: " + err.message);
-    } finally {
-      setUploading(false);
-      fileRef.current.value = "";
-    }
-  }
+  const canSend = (text.trim() || pending) && !uploading;
 
   return (
     <div className={styles.wrap} ref={wrapRef}>
@@ -89,6 +118,29 @@ export default function MessageComposer({
             <span>{replyingTo.text || `[${replyingTo.type}]`}</span>
           </div>
           <IconButton label="Cancel reply" onClick={onCancelReply}>
+            ✕
+          </IconButton>
+        </div>
+      )}
+
+      {/* Staged file — preview + cancel; uploads only on send */}
+      {pending && (
+        <div className={styles.filePreview}>
+          {pending.previewUrl ? (
+            <img
+              className={styles.fileThumb}
+              src={pending.previewUrl}
+              alt={pending.file.name}
+            />
+          ) : (
+            <span className={styles.fileIcon}>📎</span>
+          )}
+          <span className={styles.fileName}>{pending.file.name}</span>
+          <IconButton
+            label="Remove attachment"
+            onClick={clearPending}
+            disabled={uploading}
+          >
             ✕
           </IconButton>
         </div>
@@ -120,7 +172,7 @@ export default function MessageComposer({
         </div>
       )}
 
-      <form className={styles.bar} onSubmit={submitText}>
+      <form className={styles.bar} onSubmit={handleSubmit}>
         <input
           type="file"
           ref={fileRef}
@@ -142,7 +194,7 @@ export default function MessageComposer({
           onClick={() => fileRef.current.click()}
           disabled={uploading}
         >
-          {uploading ? "…" : "📎"}
+          📎
         </IconButton>
 
         <input
@@ -155,10 +207,10 @@ export default function MessageComposer({
         <button
           type="submit"
           className={styles.send}
-          disabled={!text.trim()}
+          disabled={!canSend}
           aria-label="Send"
         >
-          ➤
+          {uploading ? "…" : "➤"}
         </button>
       </form>
     </div>

@@ -115,6 +115,7 @@ per 2s while typing), `joinThread`/`leaveThread`, `sendThreadMessage`.
 
 | Feature        | UI                                                | Code |
 | -------------- | ------------------------------------------------- | ---- |
+| File preview   | 📎 stages the file (thumbnail / name + ✕ cancel); it uploads only when you press send | `messages/MessageComposer.jsx` |
 | Emoji          | 😊 opens a full picker (emoji-picker-react, lazy-loaded); emoji are just text | `messages/MessageComposer.jsx` |
 | GIFs           | GIF button → Tenor search grid (via BE `/gifs` proxy); sends as an `image` message | `messages/GifPicker.jsx` + `MessageComposer.jsx` |
 | Typing         | "name is typing…" in the header while the other side types (ephemeral socket relay) | `useMessages.js` (`typingUser`/`notifyTyping`) + `ChatView.jsx` |
